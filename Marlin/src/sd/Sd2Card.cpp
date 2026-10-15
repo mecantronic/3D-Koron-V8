@@ -244,6 +244,11 @@ bool Sd2Card::init(const uint8_t sckRateID/*=0*/, const pin_t chipSelectPin/*=SD
   extDigitalWrite(chipSelectPin_, HIGH);  // For some CPUs pinMode can write the wrong data so init desired data value first
   pinMode(chipSelectPin_, OUTPUT);        // Solution for #8746 by @benlye
   spiBegin();
+  #ifdef __AVR__
+    // Enable the internal pull-up on MISO (required by the SD spec). Without it some
+    // cards answer CMD0 with a slow-rising MISO and init fails ("SD init fail").
+    WRITE(MISO_PIN, HIGH);
+  #endif
 
   // Set SCK rate for initialization commands
   spiRate_ = SPI_SD_INIT_RATE;
